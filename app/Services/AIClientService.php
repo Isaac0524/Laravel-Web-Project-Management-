@@ -15,7 +15,7 @@ class AIClientService
 
     public function __construct()
     {
-        $this->pythonApiUrl = config('app.python_ai_url', 'http://localhost:8000/api/ai');
+        $this->pythonApiUrl = config('app.python_ai_url', 'http://localhost:5000/api/ai');
     }
 
     /**

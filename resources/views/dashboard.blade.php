@@ -127,6 +127,23 @@
             <div class="card-content">
                 <div class="kanban-board">
                     <div class="kanban-column">
+                        <div class="kanban-header pending">
+                            <h4>En Attente </h4>
+                            <span class="count">{{ count($projectsKanban['pending']) }}</span>
+                        </div>
+                        <div class="kanban-items">
+                            @foreach($projectsKanban['pending'] as $project)
+                                <div class="kanban-item">
+                                    <h5><a href="{{ route('projects.show', $project) }}">{{ $project->title }}</a></h5>
+                                    <p class="project-owner"><i class="fas fa-user"></i> {{ $project->owner->name }}</p>
+                                    @if($project->due_date)
+                                        <p class="due-date"><i class="fas fa-calendar"></i> {{ \Carbon\Carbon::parse($project->due_date)->format('d/m/Y') }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="kanban-column">
                         <div class="kanban-header in-progress">
                             <h4>En cours</h4>
                             <span class="count">{{ count($projectsKanban['in_progress']) }}</span>
@@ -318,14 +335,15 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(projectsCtx, {
         type: 'doughnut',
         data: {
-            labels: ['En cours', 'Terminés', 'Archivés'],
+            labels: ['en attente ','En cours', 'Terminés', 'Archivés'],
             datasets: [{
                 data: [
+                    {{ $stats['projects_by_status']['pending'] ?? 0 }},
                     {{ $stats['projects_by_status']['in_progress'] ?? 0 }},
                     {{ $stats['projects_by_status']['completed'] ?? 0 }},
                     {{ $stats['projects_by_status']['archived'] ?? 0 }}
                 ],
-                backgroundColor: ['#3b82f6', '#10b981', '#6b7280'],
+                backgroundColor: ['#f0a910','#3b82f6', '#10b981', '#6b7280'],
                 borderWidth: 0
             }]
         },
@@ -345,16 +363,17 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(tasksByMemberCtx, {
         type: 'bar',
         data: {
-            labels: ['open', 'in_progress', 'finalized'],
+            labels: ['en attente ','ouvert', 'en cours', 'finalisé'],
             datasets: [{
                 data: [
+                    {{ $stats['tasks_by_status']['pending'] ?? 0 }},
                     {{ $stats['tasks_by_status']['open'] ?? 0 }},
                     {{ $stats['tasks_by_status']['in_progress'] ?? 0 }},
                     {{ $stats['tasks_by_status']['finalized'] ?? 0 }}
                 ],
-                backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
-                borderRadius: 4,
-                borderSkipped: false
+                backgroundColor: ['#086964','#f59e0b', '#3b82f6', '#10b981'],
+                borderRadius: 3,
+                borderSkipped: true
             }]
         },
         options: {
@@ -384,7 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
 :root {
     --primary-color: #5D5CDE;
     --success-color: #10b981;
-    --warning-color: #f59e0b;
+    --warning-color: #e29f2a;
     --danger-color: #ef4444;
     --info-color: #06b6d4;
     --gray-100: #f3f4f6;
@@ -559,14 +578,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .kanban-board {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1px;
     background: var(--gray-200);
     min-height: 400px;
 }
 
 .kanban-column {
-    background: white;
+    background: rgb(241, 237, 237);
     display: flex;
     flex-direction: column;
 }
@@ -595,7 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
     min-width: 24px;
     text-align: center;
 }
-
+.kanban-header.pending { background: var(--warning-color); color: white; }
 .kanban-header.in-progress { background: var(--primary-color); color: white; }
 .kanban-header.completed { background: var(--success-color); color: white; }
 .kanban-header.archived { background: var(--gray-500); color: white; }
@@ -678,7 +697,7 @@ document.addEventListener('DOMContentLoaded', function() {
     text-transform: capitalize;
 }
 
-.badge-pending { background: #fef3c7; color: #92400e; }
+.badge-pending { background: #fef3c7; color: #f0a910; }
 .badge-in_progress { background: #dbeafe; color: #1e40af; }
 .badge-completed { background: #d1fae5; color: #065f46; }
 .badge-archived { background: var(--gray-200); color: var(--gray-600); }

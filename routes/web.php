@@ -122,7 +122,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{report}', [DailyReportController::class, 'update'])->name('daily_reports.update');
         Route::delete('/{report}', [DailyReportController::class, 'destroy'])->name('daily_reports.destroy');
         Route::get('/{report}/download', [DailyReportController::class, 'download'])->name('daily_reports.download');
-
+        Route::get('/{report}/preview', [DailyReportController::class, 'preview'])->name('daily_reports.preview');
         // Manager routes
         Route::get('/', [DailyReportController::class, 'dailyReports'])->name('daily_reports.daily_reports');
     });

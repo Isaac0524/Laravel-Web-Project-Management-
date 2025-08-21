@@ -21,7 +21,7 @@
                     <a class="btn btn-secondary" href="{{ route('projects.edit', $project) }}">
                         <i class="fas fa-edit"></i> Modifier
                     </a>
-                    <button id="analyze-btn" class="btn btn-primary" onclick="analyzeProject({{ $project->id }})">
+                    <button id="analyze-btn" class="btn btn-primary" onclick="confirmAnalyzeProject({{ $project->id }})">
                         <i class="fas fa-robot"></i>
                         <span id="analyze-btn-text">Analyser avec l'IA</span>
                     </button>
@@ -76,17 +76,17 @@
                         </div>
                         <div class="info-row">
                             <div class="info-item">
-                                <label>Manager</label>
+                                <label>Gestionnaire </label>
                                 <div class="owner-info">
                                     <i class="fas fa-user"></i>
                                     {{ $project->owner->name }}
                                 </div>
                             </div>
                             <div class="info-item">
-                                <label>Date de création</label>
+                                <label>Date de debut </label>
                                 <div class="date-info">
                                     <i class="fas fa-calendar-plus"></i>
-                                    {{ $project->created_at->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($project->start_date)->format('d/m/Y') }}
                                 </div>
                             </div>
                         </div>
@@ -254,6 +254,52 @@
         @endif
     </div>
 
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="ai-modal hidden">
+        <div class="ai-modal-overlay" onclick="closeConfirmationModal()"></div>
+        <div class="ai-modal-content">
+            <div class="ai-modal-header">
+                <h2 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    Confirmation requise
+                </h2>
+                <button onclick="closeConfirmationModal()" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="ai-modal-body">
+                <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-yellow-800 text-sm">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        L'analyse IA va analyser votre projet et générer automatiquement des activités et tâches optimisées.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="text-gray-700">
+                        <h4 class="font-semibold mb-2">Ce qui va se passer :</h4>
+                        <ul class="list-disc list-inside space-y-1 text-sm">
+                            <li>L'IA analysera le contenu de votre projet</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-modal-footer">
+                <button onclick="closeConfirmationModal()" class="btn btn-secondary">
+                    <i class="fas fa-times mr-2"></i>
+                    Annuler
+                </button>
+                <button onclick="proceedWithAnalysis()" class="btn btn-primary">
+                    <i class="fas fa-robot mr-2"></i>
+                    Continuer l'analyse
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis Modal -->
     <div id="ai-modal" class="ai-modal hidden">
         <div class="ai-modal-overlay" onclick="closeAIModal()"></div>
         <div class="ai-modal-content">
@@ -1116,63 +1162,63 @@
             resultsState.classList.add('hidden');
 
             fetch(`/api/ai/projects/${projectId}/analyze`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
-                // Vérifier le content-type
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Response is not JSON');
-                }
+                    // Vérifier le content-type
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Response is not JSON');
+                    }
 
-                return response.json();
-            })
-            .then(data => {
-                console.log('Received data:', data);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Received data:', data);
 
-                analyzeBtn.disabled = false;
-                analyzeBtnText.textContent = 'Analyser avec l\'IA';
+                    analyzeBtn.disabled = false;
+                    analyzeBtnText.textContent = 'Analyser avec l\'IA';
 
-                if (data.success) {
-                    generatedActivities = data.analysis.activities || [];
+                    if (data.success) {
+                        generatedActivities = data.analysis.activities || [];
 
-                    displayGeneratedActivities(generatedActivities);
+                        displayGeneratedActivities(generatedActivities);
 
-                    loadingState.classList.add('hidden');
-                    resultsState.classList.remove('hidden');
-                } else {
+                        loadingState.classList.add('hidden');
+                        resultsState.classList.remove('hidden');
+                    } else {
+                        closeAIModal();
+                        showNotification('Erreur lors de l\'analyse: ' + (data.message || 'Erreur inconnue'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur complète:', error);
+                    analyzeBtn.disabled = false;
+                    analyzeBtnText.textContent = 'Analyser avec l\'IA';
                     closeAIModal();
-                    showNotification('Erreur lors de l\'analyse: ' + (data.message || 'Erreur inconnue'), 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur complète:', error);
-                analyzeBtn.disabled = false;
-                analyzeBtnText.textContent = 'Analyser avec l\'IA';
-                closeAIModal();
 
-                let errorMessage = 'Erreur lors de l\'analyse du projet';
-                if (error.message.includes('404')) {
-                    errorMessage = 'Route non trouvée. Vérifiez la configuration des routes API.';
-                } else if (error.message.includes('500')) {
-                    errorMessage = 'Erreur serveur. Vérifiez les logs du serveur.';
-                } else if (error.message.includes('JSON')) {
-                    errorMessage = 'Réponse serveur invalide. Vérifiez que l\'API retourne du JSON.';
-                }
+                    let errorMessage = 'Erreur lors de l\'analyse du projet';
+                    if (error.message.includes('404')) {
+                        errorMessage = 'Route non trouvée. Vérifiez la configuration des routes API.';
+                    } else if (error.message.includes('500')) {
+                        errorMessage = 'Erreur serveur. Vérifiez les logs du serveur.';
+                    } else if (error.message.includes('JSON')) {
+                        errorMessage = 'Réponse serveur invalide. Vérifiez que l\'API retourne du JSON.';
+                    }
 
-                showNotification(errorMessage, 'error');
-            });
+                    showNotification(errorMessage, 'error');
+                });
         }
 
         function displayGeneratedActivities(activities) {
@@ -1189,10 +1235,12 @@
                                     value="${escapeHtml(activity.title)}"
                                     placeholder="Titre de l'activité"
                                     onchange="updateActivityTitle(${activityIndex}, this.value)"
+                                    style="width: 100%; font-size: 1rem; padding: 0.6rem;"
                                 />
                                 <textarea
                                     placeholder="Description de l'activité"
                                     onchange="updateActivityDescription(${activityIndex}, this.value)"
+                                    style="width: 100%; height: 80px; font-size: 0.95rem; padding: 0.5rem;"
                                 >${escapeHtml(activity.description || '')}</textarea>
                             </div>
                             <button
@@ -1203,6 +1251,7 @@
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
+
 
                         <div class="tasks-list">
                             <h4 style="margin: 0 0 12px 0; font-size: 16px; color: var(--gray-700);">
@@ -1359,7 +1408,8 @@
                 for (let j = 0; j < activity.tasks.length; j++) {
                     const task = activity.tasks[j];
                     if (!task.title.trim()) {
-                        showNotification(`La tâche ${j + 1} de l'activité "${activity.title}" doit avoir un titre`, 'error');
+                        showNotification(`La tâche ${j + 1} de l'activité "${activity.title}" doit avoir un titre`,
+                            'error');
                         return;
                     }
                 }
@@ -1371,63 +1421,63 @@
 
             // Envoyer les données au serveur avec le bon préfixe
             fetch(`/api/ai/projects/${currentProjectId}/create-activities`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    activities: generatedActivities
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        activities: generatedActivities
+                    })
                 })
-            })
-            .then(response => {
-                console.log('Create activities response status:', response.status);
+                .then(response => {
+                    console.log('Create activities response status:', response.status);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Response is not JSON');
-                }
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('Response is not JSON');
+                    }
 
-                return response.json();
-            })
-            .then(data => {
-                console.log('Create activities data:', data);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Create activities data:', data);
 
-                validateBtn.disabled = false;
-                validateBtnText.textContent = 'Valider et créer';
+                    validateBtn.disabled = false;
+                    validateBtnText.textContent = 'Valider et créer';
 
-                if (data.success) {
-                    closeAIModal();
-                    showNotification(`${data.activities_count} activités créées avec succès!`, 'success');
+                    if (data.success) {
+                        closeAIModal();
+                        showNotification(`${data.activities_count} activités créées avec succès!`, 'success');
 
-                    // Recharger la page pour afficher les nouvelles activités
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showNotification('Erreur lors de la création: ' + (data.message || 'Erreur inconnue'), 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Erreur lors de la création:', error);
-                validateBtn.disabled = false;
-                validateBtnText.textContent = 'Valider et créer';
+                        // Recharger la page pour afficher les nouvelles activités
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showNotification('Erreur lors de la création: ' + (data.message || 'Erreur inconnue'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la création:', error);
+                    validateBtn.disabled = false;
+                    validateBtnText.textContent = 'Valider et créer';
 
-                let errorMessage = 'Erreur lors de la création des activités';
-                if (error.message.includes('404')) {
-                    errorMessage = 'Route de création non trouvée. Vérifiez la configuration des routes API.';
-                } else if (error.message.includes('500')) {
-                    errorMessage = 'Erreur serveur lors de la création. Vérifiez les logs du serveur.';
-                } else if (error.message.includes('JSON')) {
-                    errorMessage = 'Réponse serveur invalide lors de la création.';
-                }
+                    let errorMessage = 'Erreur lors de la création des activités';
+                    if (error.message.includes('404')) {
+                        errorMessage = 'Route de création non trouvée. Vérifiez la configuration des routes API.';
+                    } else if (error.message.includes('500')) {
+                        errorMessage = 'Erreur serveur lors de la création. Vérifiez les logs du serveur.';
+                    } else if (error.message.includes('JSON')) {
+                        errorMessage = 'Réponse serveur invalide lors de la création.';
+                    }
 
-                showNotification(errorMessage, 'error');
-            });
+                    showNotification(errorMessage, 'error');
+                });
         }
 
         function closeAIModal() {
@@ -1442,6 +1492,24 @@
 
             // Reset des variables
             generatedActivities = [];
+        }
+
+        // Fonction de confirmation avant l'analyse
+        function confirmAnalyzeProject(projectId) {
+            const modal = document.getElementById('confirmation-modal');
+            modal.classList.remove('hidden');
+        }
+
+        // Fermer la modal de confirmation
+        function closeConfirmationModal() {
+            const modal = document.getElementById('confirmation-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Procéder avec l'analyse après confirmation
+        function proceedWithAnalysis() {
+            closeConfirmationModal();
+            analyzeProject(currentProjectId);
         }
 
         function showNotification(message, type = 'info') {

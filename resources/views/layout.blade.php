@@ -12,6 +12,29 @@
 </head>
 
 <body>
+    <!-- Background Pattern -->
+    <div class="background-pattern">
+        <!-- Dots pattern -->
+        <div class="dots-pattern"></div>
+
+        <!-- Geometric shapes -->
+        <div class="geometric-shape circle-1"></div>
+        <div class="geometric-shape circle-2"></div>
+        <div class="geometric-shape circle-3"></div>
+        <div class="geometric-shape square-1"></div>
+        <div class="geometric-shape square-2"></div>
+        <div class="geometric-shape square-3"></div>
+        <div class="geometric-shape triangle-1"></div>
+        <div class="geometric-shape triangle-2"></div>
+        <div class="geometric-shape hexagon-1"></div>
+        <div class="geometric-shape rectangle-1"></div>
+        <div class="geometric-shape rectangle-2"></div>
+        <div class="geometric-shape diamond-1"></div>
+        <div class="geometric-shape oval-1"></div>
+        <div class="geometric-shape oval-2"></div>
+
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-left">
@@ -41,12 +64,12 @@
                         <div class="profile-details">
                             <div class="profile-item">
                                 <i class="fas fa-calendar-alt"></i>
-                                <span>Compte créé le</span>
+                                <span>Compte crée le</span>
                                 <span class="profile-value">{{ auth()->user()->created_at->format('d/m/Y') }}</span>
                             </div>
                             <div class="profile-item">
                                 <i class="fas fa-user-tag"></i>
-                                <span>Rôle</span>
+                                <span>Role</span>
                                 <span class="profile-value">{{ ucfirst(auth()->user()->role) }}</span>
                             </div>
                         </div>
@@ -86,7 +109,7 @@
                     @if (auth()->user()->isManager())
                         <li><a href="{{ route('daily_reports.daily_reports') }}" class="nav-link"><i
                                     class="fas fa-file-alt"></i> Rapports Journaliers</a></li>
-                        <li><a href="{{ route('teams.index') }}" class="nav-link"><i class="fas fa-users"></i> Équipes</a>
+                        <li><a href="{{ route('teams.index') }}" class="nav-link"><i class="fas fa-users"></i> Equipes</a>
                         </li>
                         <li><a href="{{ route('users.index') }}" class="nav-link"><i class="fas fa-user-friends"></i>
                                 Utilisateurs</a></li>
@@ -244,21 +267,21 @@
                         bot: data.reply
                     });
 
-                    // Si des données sont retournées (projet, tâche, etc.)
+                    // Si des donnÃ©es sont retournÃ©es (projet, tÃ¢che, etc.)
                     if (data.project || data.task) {
-                        // Afficher les informations supplémentaires
+                        // Afficher les informations supplÃ©mentaires
                         const info = data.project ? `Projet: ${data.project.title}` :
-                                   data.task ? `Tâche: ${data.task.title}` : '';
+                            data.task ? `TÃ¢che: ${data.task.title}` : '';
                         if (info) {
-                            addChatMessage(`✅ ${info}`, 'bot');
+                            addChatMessage(`âœ… ${info}`, 'AI');
                         }
                     }
                 } else {
-                    addChatMessage('Désolé, une erreur est survenue. Veuillez réessayer.', 'bot');
+                    addChatMessage('Désolé , une erreur est survenue. Veuillez réessayer.', 'AI');
                 }
             } catch (error) {
                 removeLoadingMessage();
-                addChatMessage('Erreur de connexion au service IA. Veuillez réessayer.', 'bot');
+                addChatMessage('Erreur de connexion au service IA. Veuillez réessayer.', 'AI');
                 console.error('AI Chat Error:', error);
             } finally {
                 isProcessing = false;
@@ -347,7 +370,6 @@
             }
         });
     </script>
-
     <style>
         /* Reset et variables */
         * {
@@ -385,6 +407,190 @@
             background-color: var(--gray-50);
             color: var(--gray-900);
             line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Pattern */
+        .background-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Dots pattern */
+        .dots-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle, rgba(8, 149, 243, 0.15) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+
+        /* Geometric shapes */
+        .geometric-shape {
+            position: absolute;
+            border: 1px solid rgba(8, 149, 243, 0.3);
+            background: rgba(8, 149, 243, 0.05);
+        }
+
+        /* Circles */
+        .circle-1 {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            top: 15%;
+            left: 8%;
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .circle-2 {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            top: 60%;
+            right: 12%;
+            border-color: rgba(245, 158, 11, 0.3);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .circle-3 {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            bottom: 20%;
+            left: 20%;
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* Squares */
+        .square-1 {
+            width: 100px;
+            height: 100px;
+            top: 25%;
+            right: 15%;
+            border-color: rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.05);
+            transform: rotate(15deg);
+        }
+        .square-2 {
+            width: 100px;
+            height: 100px;
+            top: 25%;
+            right: 15%;
+            border-color: rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.05);
+            transform: rotate(15deg);
+        }
+
+        .square-3 {
+            width: 70px;
+            height: 70px;
+            bottom: 30%;
+            right: 25%;
+            border-color: rgba(107, 70, 193, 0.3);
+            background: rgba(107, 70, 193, 0.05);
+            transform: rotate(-20deg);
+        }
+
+        /* Triangles */
+        .triangle-1 {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 70px solid rgba(236, 72, 153, 0.3);
+            background: transparent;
+            top: 40%;
+            left: 15%;
+            transform: rotate(30deg);
+        }
+
+        .triangle-2 {
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-bottom: 50px solid rgba(34, 197, 94, 0.3);
+            background: transparent;
+            top: 70%;
+            right: 8%;
+            transform: rotate(-45deg);
+        }
+
+        /* Hexagon */
+        .hexagon-1 {
+            width: 90px;
+            height: 90px;
+            background: rgba(251, 191, 36, 0.05);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            top: 50%;
+            left: 5%;
+        }
+
+        /* Rectangles */
+        .rectangle-1 {
+            width: 140px;
+            height: 60px;
+            top: 10%;
+            right: 5%;
+            border-color: rgba(168, 85, 247, 0.3);
+            background: rgba(168, 85, 247, 0.05);
+            transform: rotate(-10deg);
+        }
+
+        .rectangle-2 {
+            width: 100px;
+            height: 40px;
+            bottom: 15%;
+            left: 40%;
+            border-color: rgba(14, 165, 233, 0.3);
+            background: rgba(14, 165, 233, 0.05);
+            transform: rotate(25deg);
+        }
+
+        /* Diamond */
+        .diamond-1 {
+            width: 80px;
+            height: 80px;
+            top: 30%;
+            left: 45%;
+            border-color: rgba(139, 69, 19, 0.3);
+            background: rgba(139, 69, 19, 0.05);
+            transform: rotate(45deg);
+        }
+
+        /* Oval */
+        .oval-1 {
+            width: 120px;
+            height: 60px;
+            border-radius: 50%;
+            bottom: 40%;
+            right: 20%;
+            border-color: rgba(220, 38, 127, 0.3);
+            background: rgba(220, 38, 127, 0.05);
+            transform: rotate(-15deg);
+        }
+        .oval-2 {
+            width: 120px;
+            height: 60px;
+            border-radius: 50%;
+            bottom: 78%;
+            right: 50%;
+            border-color: rgba(220, 38, 127, 0.3);
+            background: rgba(220, 38, 127, 0.05);
+            transform: rotate(-15deg);
         }
 
         /* Header */
@@ -893,11 +1099,15 @@
             min-height: calc(100vh - var(--header-height));
             display: flex;
             flex-direction: column;
+            position: relative;
+            z-index: 2;
         }
 
         .content-wrapper {
             flex: 1;
             padding: 24px;
+            position: relative;
+            z-index: 2;
         }
 
         .flash-message {
@@ -926,6 +1136,8 @@
             text-align: center;
             color: var(--gray-500);
             font-size: 14px;
+            position: relative;
+            z-index: 2;
         }
 
         @media (max-width: 1024px) {
@@ -979,6 +1191,79 @@
                 width: 100%;
                 max-width: var(--ai-sidebar-width);
             }
+
+            /* Reduce shapes on mobile for cleaner look */
+            .geometric-shape {
+                display: none;
+            }
+
+            .circle-1, .circle-2, .square-1, .hexagon-1 {
+                display: block;
+            }
+
+            .circle-1 {
+                width: 80px;
+                height: 80px;
+            }
+
+            .circle-2 {
+                width: 60px;
+                height: 60px;
+            }
+
+            .square-1 {
+                width: 70px;
+                height: 70px;
+            }
+
+            .hexagon-1 {
+                width: 60px;
+                height: 60px;
+            }
+
+            .dots-pattern {
+                background-size: 20px 20px;
+            }
+        }
+
+        /* Loading dots animation for AI chat */
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            background-color: var(--gray-500);
+            border-radius: 50%;
+            animation: loadingBounce 1.4s ease-in-out infinite both;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes loadingBounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Hover effects for enhanced interactivity */
+        .nav-link:hover i {
+            transform: scale(1.1);
+            transition: transform 0.2s ease;
+        }
+
+        .header h2 {
+            background: linear-gradient(45deg, var(--primary-color), #00C4B4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
         }
     </style>
 </body>

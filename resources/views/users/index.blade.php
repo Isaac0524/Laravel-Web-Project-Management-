@@ -158,15 +158,6 @@
                                                     <i class="fas fa-key"></i>
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ route('users.destroy', $u) }}"
-                                                onsubmit="return confirm('Confirmer la suppression de cet utilisateur ?')">
-                                                @csrf @method('DELETE')
-                                                <button type="submit"
-                                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                                    {{ $u->id === Auth::id() ? 'disabled' : '' }}>
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
                                         </div>
                                     </td>
                                 </tr>

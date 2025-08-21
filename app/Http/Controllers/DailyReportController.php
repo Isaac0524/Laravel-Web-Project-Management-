@@ -58,6 +58,34 @@ class DailyReportController extends Controller
 
         return view('daily_reports.daily_reports', compact('reports', 'projects', 'users'));
     }
+    public function preview(DailyReport $report)
+    {
+        if (!$report->hasFile()) {
+            abort(404, 'Fichier non trouvé.');
+        }
+
+        $filePath = storage_path('app/public/' . $report->file_path); // Assurez-vous que le chemin est correct
+        $extension = strtolower(pathinfo($report->file_name, PATHINFO_EXTENSION));
+
+        // Définir les types MIME pour l'aperçu
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'pdf' => 'application/pdf',
+        ];
+
+        if (!array_key_exists($extension, $mimeTypes)) {
+            abort(400, 'Type de fichier non pris en charge pour l\'aperçu.');
+        }
+
+        return response()->file($filePath, [
+            'Content-Type' => $mimeTypes[$extension],
+            'Content-Disposition' => 'inline; filename="' . $report->file_name . '"',
+        ]);
+    }
 
     /**
      * Show form to create a new daily report

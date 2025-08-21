@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Project extends Model
 {
-    protected $fillable = ['title','description','owner_id','status','due_date'];
+    protected $fillable = ['title','description','owner_id','status','due_date','start_date'];
 
     public function owner(): BelongsTo
     {
@@ -43,6 +43,30 @@ class Project extends Model
             $this->status = 'completed';
             $this->save();
         }
+    }
+
+    /**
+     * Check if project should be in progress based on start date
+     */
+    public function shouldBeInProgress(): bool
+    {
+        if (!$this->start_date) {
+            return true;
+        }
+
+        return now()->gte($this->start_date);
+    }
+
+    /**
+     * Get the current status considering start date
+     */
+    public function getCurrentStatus(): string
+    {
+        if ($this->status === 'pending' && $this->shouldBeInProgress()) {
+            return 'in_progress';
+        }
+
+        return $this->status;
     }
 
     /**

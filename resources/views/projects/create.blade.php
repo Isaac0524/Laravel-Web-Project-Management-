@@ -179,6 +179,10 @@ textarea {
 
             <div class="form-row">
                 <div>
+                    <label for="start_date">Date de début</label>
+                    <input id="start_date" type="date" name="start_date" required>
+                </div>
+                <div>
                     <label for="due_date">Échéance</label>
                     <input id="due_date" type="date" name="due_date" required>
                 </div>
@@ -191,19 +195,6 @@ textarea {
     </div>
 </div>
 
-<script>
-  const formProj = document.getElementById('project-create');
-  document.getElementById('suggest-list').addEventListener('click', () => {
-    const title = formProj.querySelector('input[name="title"]').value;
-    const desc = formProj.querySelector('textarea[name="description"]').value;
-    fetch(`{{ route('ai.suggest.task_list') }}?project_id={{ auth()->user()->projects()->first()->id ?? 1 }}&activity_title=${encodeURIComponent(title)}&activity_description=${encodeURIComponent(desc)}`, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    }).then(r => r.json()).then(data => {
-      const container = formProj.querySelector('[data-dyn-list]');
-      container.innerHTML = '';
-      data.tasks.forEach(t => addTaskRow(container, t.title, t.description, t.priority));
-    });
-  });
-</script>
+
 
 @endsection

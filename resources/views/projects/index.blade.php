@@ -97,8 +97,9 @@
         }
 
         .project-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
         .project-info {
             flex: 1;
         }
@@ -117,40 +118,40 @@
         }
 
         .progress-bar {
-    width: 100%;
-    height: 8px;
-    background-color: #e5e7eb;
-    border-radius: 4px;
-    overflow: hidden;
-}
+            width: 100%;
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
 
         .progress-bar-fill {
-    height: 100%;
-    background-color: #6366f1;
-    border-radius: 4px;
-    transition: width 0.3s ease-in-out;
-}
+            height: 100%;
+            background-color: #6366f1;
+            border-radius: 4px;
+            transition: width 0.3s ease-in-out;
+        }
 
         .team-members {
-    display: flex;
-    gap: 0.25rem;
-    align-items: center;
-}
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
 
-.team-member {
-    width: 32px;
-    height: 32px;
-    background-color: #ef4444;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 2px solid white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
+        .team-member {
+            width: 32px;
+            height: 32px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
 
         .project-details {
             text-align: right;
@@ -171,10 +172,11 @@
             color: white;
         }
 
-        .badge-in_revision {
+        .badge-pending {
             background-color: #f59e0b;
             color: white;
         }
+
 
         .badge-completed {
             background-color: #6366f1;
@@ -409,31 +411,34 @@
                 @foreach ($projects as $project)
                     <div class="project-card">
                         <!-- Première ligne: Titre à gauche, Statut à droite -->
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                            <div>
-                                <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937; margin: 0 0 0.25rem 0;">
-                                    {{ $project->title }} <span class="badge badge-{{ $project->status }}"
-                                style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;margin-left: 0.5rem;">
-                                {{ $project->status === 'in_progress' ? 'EN COURS' : ($project->status === 'in_revision' ? 'EN RÉVISION' : 'TERMINÉ') }}
-                            </span>
-                                </h3>
-                                <div style="font-size: 0.875rem; color: #6b7280;">
-                                    Échéance:
-                                    {{ $project->due_date ? \Carbon\Carbon::parse($project->due_date)->format('d M Y') : 'Pas d\'échéance' }}
-                                </div>
-                            </div>
-
-                            <div>
-                                <a href="{{ route('projects.show', $project->id) }}">
-                                    <i class="fas fa-eye" style="color: #3b82f6;"></i>
-                                </a>
-                                @if ($user->isManager())
-                                    <a href="{{ route('projects.edit', $project->id) }}" style="margin-left: 0.5rem;">
-                                        <i class="fas fa-edit" style="color: #f59e0b;"></i>
-                                    </a>
+                        <h3 style="font-size: 1.125rem; font-weight: 600; color: #1f2937; margin: 0 0 0.25rem 0;">
+                            {{ $project->title }}
+                            <span class="badge badge-{{ $project->status }}"
+                                style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-left: 0.5rem;">
+                                @if ($project->status === 'in_progress')
+                                    EN COURS
+                                @elseif ($project->status === 'in_revision')
+                                    EN RÉVISION
+                                @elseif ($project->status === 'pending')
+                                    EN ATTENTE
+                                @elseif ($project->status === 'completed')
+                                    TERMINÉ
+                                @elseif ($project->status === 'archived')
+                                    ARCHIVÉ
+                                @else
+                                    {{ strtoupper($project->status) }}
                                 @endif
-                                </div>
+                            </span>
+                        </h3>
+                        <div>
+                            <a href="{{ route('projects.show', $project->id) }}">
+                                <i class="fas fa-eye" style="color: #3b82f6;"></i>
+                            </a>
+                            @if ($user->isManager())
+                            <a href="{{ route('projects.edit', $project->id) }}" style="margin-left: 0.5rem;">
+                                <i class="fas fa-edit" style="color: #f59e0b;"></i>
+                            </a>
+                            @endif
                         </div>
 
                         <!-- Deuxième ligne: Barre de progression complète -->

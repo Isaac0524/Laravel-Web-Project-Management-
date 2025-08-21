@@ -140,13 +140,19 @@ textarea {
 
             <div class="form-row">
                 <div>
+                    <label>Date de début</label>
+                    <input type="date" name="start_date" value="{{ old('start_date',$project->start_date) }}" required>
+                </div>
+                <div>
                     <label>Échéance</label>
                     <input type="date" name="due_date" value="{{ old('due_date',$project->due_date) }}" required>
                 </div>
+            </div>
+            <div class="form-row">
                 <div>
-                <label>Statut</label>
+                    <label>Statut</label>
                     <select name="status" required>
-                        @foreach(['in_progress'=>'En cours','archived'=>'Archivé'] as $k=>$v)
+                        @foreach(['pending'=>'En attente','in_progress'=>'En cours','archived'=>'Archivé'] as $k=>$v)
                             <option value="{{ $k }}" @selected($project->status===$k)>{{ $v }}</option>
                         @endforeach
                     </select>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Services\AIClientService;
-
+use Carbon\Carbon;
 class ProjectController extends Controller
 {
     protected $aiService;
@@ -36,10 +36,15 @@ class ProjectController extends Controller
         $data = $request->validate([
             'title'=>'required|string|max:255',
             'description'=>'nullable|string',
-            'due_date'=>'required|date|after:today'
+            'start_date'=>'required|date|after_or_equal:today',
+            'due_date'=>'required|date|after:start_date'
         ]);
         $data['owner_id'] = $request->user()->id;
-        $data['status'] = 'in_progress';
+
+        // Set status based on start date
+        $startDate = Carbon::parse($data['start_date']);
+        $data['status'] = $startDate->isToday() ? 'in_progress' : 'pending';
+
         $project = Project::create($data);
         return redirect()->route('projects.show',$project)->with('ok','Projet créé');
     }
@@ -194,17 +199,30 @@ class ProjectController extends Controller
         if ($project->owner_id !== $request->user()->id) abort(403);
 
         $data = $request->validate([
-            'title'=>'required|string|max:255',
-            'description'=>'nullable|string',
-            'due_date'=>'required|date|after:today',
-            'status'=>'required|in:in_progress,archived'
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_date'  => 'required|date|after_or_equal:today',
+            'due_date'    => 'required|date|after:start_date',
+            'status'      => 'required|in:pending,in_progress,archived,completed'
         ]);
 
-        if ($request->status === 'archived' && $project->status !== 'completed') {
-            return back()->withErrors(['status' => 'Un projet ne peut être archivé que s\'il est d\'abord marqué comme terminé.'])->withInput();
+        // Vérifier si on veut archiver un projet pas encore terminé
+        if ($data['status'] === 'archived' && $project->status !== 'completed') {
+            return back()->withErrors([
+                'status' => 'Un projet ne peut être archivé que s\'il est d\'abord marqué comme terminé.'
+            ])->withInput();
+        }
+
+        // Forcer le statut en fonction de la date de début
+        $startDate = Carbon::parse($data['start_date']);
+        if ($data['status'] !== 'archived') { // on ne touche pas si on archive volontairement
+            $data['status'] = $startDate->isToday() ? 'in_progress' : 'pending';
         }
 
         $project->update($data);
-        return redirect()->route('projects.show',$project)->with('ok','Projet mis à jour');
+
+        return redirect()->route('projects.show', $project)
+                        ->with('ok', 'Projet mis à jour');
     }
+
 }

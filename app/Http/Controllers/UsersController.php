@@ -8,6 +8,8 @@ use Illuminate\Validation\Rule;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PasswordResetMail;
 use Carbon\Carbon;
 
 class UsersController extends Controller
@@ -48,7 +50,7 @@ class UsersController extends Controller
 
     public function update(User $user, Request $request)
     {
-        
+
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -80,7 +82,13 @@ class UsersController extends Controller
         $user->password = Hash::make($new);
         $user->save();
 
-        return back()->with('success', 'Nouveau mot de passe pour ' . $user->email . ': ' . $new);
+        // Send password via email
+        \Mail::to($user->email)->send(new \App\Mail\PasswordResetMail($user, $new));
+
+        // Show masked password on page
+        $maskedPassword = substr($new, 0, 3) . str_repeat('*', strlen($new) - 6) . substr($new, -3);
+
+        return back()->with('success', 'Le nouveau mot de passe a été envoyé à l\'adresse email de ' . $user->email . '. Mot de passe masqué: ' . $maskedPassword);
     }
 
     public function changeRole(User $user, Request $request)

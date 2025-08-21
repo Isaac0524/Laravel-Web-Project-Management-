@@ -204,12 +204,6 @@ h2 {
                                     <a href="{{ route('daily_reports.show', $report) }}" class="btn btn-sm btn-outline-info">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <form action="{{ route('daily_reports.destroy', $report) }}" method="POST" style="display: inline;">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
                                 </td>
                             </tr>
                         @endforeach

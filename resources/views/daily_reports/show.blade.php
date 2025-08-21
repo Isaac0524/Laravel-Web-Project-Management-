@@ -74,7 +74,7 @@
     padding: 0.75rem;
     background: #f3f4f6;
     border-radius: 0.375rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .file-icon {
@@ -82,6 +82,31 @@
     color: #3b82f6;
 }
 
+/* Aperçu fichier */
+.file-preview {
+    margin-top: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    position: relative;
+}
+.file-preview img {
+    max-width: 100%;
+    display: block;
+    object-fit: contain;
+}
+.file-preview iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+}
+.file-preview-error {
+    padding: 1rem;
+    color: #ef4444;
+    text-align: center;
+    background: #fef2f2;
+    border-radius: 0.375rem;
+}
 @media (max-width: 768px) {
     .report-meta {
         grid-template-columns: 1fr;
@@ -128,21 +153,29 @@
                         <i class="fas fa-download"></i> Télécharger
                     </a>
                 </div>
+
+                {{-- Aperçu du fichier --}}
+                <div class="file-preview">
+                    @php
+                        $ext = strtolower(pathinfo($report->file_name, PATHINFO_EXTENSION));
+                    @endphp
+
+                    @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+                        <img src="{{ route('daily_reports.preview', $report) }}" alt="Aperçu image" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=file-preview-error>Erreur lors du chargement de l\'aperçu de l\'image.</div>'">
+                    @elseif($ext === 'pdf')
+                        <iframe src="{{ route('daily_reports.preview', $report) }}" title="Aperçu PDF"></iframe>
+                    @else
+                        <div class="file-preview-error">
+                            Aucun aperçu disponible pour ce type de fichier.
+                        </div>
+                    @endif
+                </div>
             @endif
 
             <div class="mt-4">
                 <a href="{{ auth()->user()->id === $report->user_id ? route('daily_reports.my_day') : route('daily_reports.daily_reports') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
-
-                @if(auth()->user()->id === $report->user_id || auth()->user()->isManager())
-                    <form action="{{ route('daily_reports.destroy', $report) }}" method="POST" style="display: inline;">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')">
-                            <i class="fas fa-trash"></i> Supprimer
-                        </button>
-                    </form>
-                @endif
             </div>
         </div>
     </div>
