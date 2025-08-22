@@ -5,12 +5,97 @@
     <div class="dashboard-header">
         <h1>Tableau de bord</h1>
         <div class="user-info">
-            <span class="user-role {{ $user->isManager() ? 'manager' : 'member' }}">
-                {{ $user->isManager() ? 'Manager' : 'Membre' }}
+            <span class="user-role {{ $user->isAdmin() ? 'admin' : ($user->isManager() ? 'manager' : 'member') }}">
+                {{ $user->isAdmin() ? 'Admin' : ($user->isManager() ? 'Manager' : 'Membre') }}
             </span>
         </div>
     </div>
 
+    <!-- Section Alertes pour les managers -->
+    @if($user->isManager() && isset($alerts))
+    <div class="alerts-section">
+        @php
+            $totalAlerts = count($alerts['starting_today']) + count($alerts['due_soon']) + count($alerts['overdue']);
+        @endphp
+
+        @if($totalAlerts > 0)
+        <div class="card">
+            <div class="card-header">
+                <h3>Alertes Projets</h3>
+                <span class="badge badge-warning">{{ $totalAlerts }}</span>
+            </div>
+            <div class="card-content">
+                <!-- Alertes de début de projet -->
+                @if(count($alerts['starting_today']) > 0)
+                <div class="alert-card alert-card-starting">
+                    <div class="alert-card-header">
+                        <div class="alert-card-title">
+                            <i class="fas fa-play-circle" style="color: #10b981;"></i>
+                            Démarrage aujourd'hui
+                            <span class="alert-card-count">{{ count($alerts['starting_today']) }}</span>
+                        </div>
+                    </div>
+                    <ul class="alert-card-list">
+                        @foreach($alerts['starting_today'] as $project)
+                        <li class="alert-card-item">
+                            <span class="alert-project-name">{{ $project->title }}</span>
+                            <span class="alert-project-date">Aujourd'hui</span>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                <!-- Alertes d'échéance proche -->
+                @if(count($alerts['due_soon']) > 0)
+                <div class="alert-card alert-card-due">
+                    <div class="alert-card-header">
+                        <div class="alert-card-title">
+                            <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                            Échéance proche (7 jours)
+                            <span class="alert-card-count">{{ count($alerts['due_soon']) }}</span>
+                        </div>
+                    </div>
+                    <ul class="alert-card-list">
+                        @foreach($alerts['due_soon'] as $project)
+                        <li class="alert-card-item">
+                            <span class="alert-project-name">{{ $project->title }}</span>
+                            <span class="alert-project-date">
+                                {{ \Carbon\Carbon::parse($project->due_date)->diffForHumans() }}
+                            </span>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                <!-- Alertes de retard -->
+                @if(count($alerts['overdue']) > 0)
+                <div class="alert-card alert-card-overdue">
+                    <div class="alert-card-header">
+                        <div class="alert-card-title">
+                            <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
+                            Projets en retard
+                            <span class="alert-card-count">{{ count($alerts['overdue']) }}</span>
+                        </div>
+                    </div>
+                    <ul class="alert-card-list">
+                        @foreach($alerts['overdue'] as $project)
+                        <li class="alert-card-item">
+                            <span class="alert-project-name">{{ $project->title }}</span>
+                            <span class="alert-project-date">
+                                Retard: {{ \Carbon\Carbon::parse($project->due_date)->diffForHumans() }}
+                            </span>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
     <!-- Statistiques -->
     <div class="stats-grid">
         @if($user->isManager())
@@ -394,6 +479,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Initialisation des alertes
+    @if(isset($alerts))
+    window.projectAlerts = @json($alerts);
+    @endif
 });
 </script>
 @endif

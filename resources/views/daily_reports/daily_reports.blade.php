@@ -370,11 +370,6 @@
             @endforeach
         @endif
     </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-        {{ $reports->links() }}
-    </div>
 </div>
 
 @endsection

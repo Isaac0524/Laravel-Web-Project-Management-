@@ -95,24 +95,35 @@
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-content">
             <ul class="nav-menu">
+                @if (!auth()->user()->isAdmin())
                 <li><a href="{{ route('dashboard') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Tableau de
                         bord</a></li>
-                <li><a href="{{ route('projects.index') }}" class="nav-link"><i class="fas fa-folder"></i> Projets</a>
-                </li>
+                @endif
                 @auth
-                    @if (auth()->user()->isMember())
-                        <li><a href="{{ route('my.work') }}" class="nav-link"><i class="fas fa-briefcase"></i> Mon
-                                travail</a></li>
-                        <li><a href="{{ route('daily_reports.my_day') }}" class="nav-link"><i
-                                    class="fas fa-calendar-day"></i> Ma journée</a></li>
-                    @endif
-                    @if (auth()->user()->isManager())
-                        <li><a href="{{ route('daily_reports.daily_reports') }}" class="nav-link"><i
-                                    class="fas fa-file-alt"></i> Rapports Journaliers</a></li>
-                        <li><a href="{{ route('teams.index') }}" class="nav-link"><i class="fas fa-users"></i> Equipes</a>
-                        </li>
+                    @if (auth()->user()->isAdmin())
+                        <!-- Menu spécifique à l'admin -->
                         <li><a href="{{ route('users.index') }}" class="nav-link"><i class="fas fa-user-friends"></i>
-                                Utilisateurs</a></li>
+                                Dashboard</a></li>
+                        <li><a href="{{ route('users.project_managers') }}" class="nav-link"><i
+                                    class="fas fa-user-cog"></i> Gestionnaires de Projet</a></li>
+                    @else
+                        <!-- Menu pour les autres rôles (Manager et Membre) -->
+                        <li><a href="{{ route('projects.index') }}" class="nav-link"><i class="fas fa-folder"></i>
+                                Projets</a></li>
+
+                        @if (auth()->user()->isMember())
+                            <li><a href="{{ route('my.work') }}" class="nav-link"><i class="fas fa-briefcase"></i> Mon
+                                    travail</a></li>
+                            <li><a href="{{ route('daily_reports.my_day') }}" class="nav-link"><i
+                                        class="fas fa-calendar-day"></i> Ma journée</a></li>
+                        @endif
+
+                        @if (auth()->user()->isManager())
+                            <li><a href="{{ route('daily_reports.daily_reports') }}" class="nav-link"><i
+                                        class="fas fa-file-alt"></i> Rapports Journaliers</a></li>
+                            <li><a href="{{ route('teams.index') }}" class="nav-link"><i class="fas fa-users"></i>
+                                    Equipes</a></li>
+                        @endif
                     @endif
                 @endauth
             </ul>
@@ -483,6 +494,7 @@
             background: rgba(6, 182, 212, 0.05);
             transform: rotate(15deg);
         }
+
         .square-2 {
             width: 100px;
             height: 100px;
@@ -582,6 +594,7 @@
             background: rgba(220, 38, 127, 0.05);
             transform: rotate(-15deg);
         }
+
         .oval-2 {
             width: 120px;
             height: 60px;
@@ -665,6 +678,25 @@
         .user-role {
             font-size: 12px;
             color: var(--gray-500);
+
+        }
+
+        .user-role.admin {
+            background-color: #dc2626;
+            /* Rouge pour admin */
+            color: white;
+        }
+
+        .user-role.manager {
+            background-color: #2563eb;
+            /* Bleu pour manager */
+            color: white;
+        }
+
+        .user-role.member {
+            background-color: #16a34a;
+            /* Vert pour membre */
+            color: white;
         }
 
         .logout-btn,
@@ -1197,7 +1229,10 @@
                 display: none;
             }
 
-            .circle-1, .circle-2, .square-1, .hexagon-1 {
+            .circle-1,
+            .circle-2,
+            .square-1,
+            .hexagon-1 {
                 display: block;
             }
 
@@ -1240,13 +1275,22 @@
             animation: loadingBounce 1.4s ease-in-out infinite both;
         }
 
-        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
 
         @keyframes loadingBounce {
-            0%, 80%, 100% {
+
+            0%,
+            80%,
+            100% {
                 transform: scale(0);
             }
+
             40% {
                 transform: scale(1);
             }

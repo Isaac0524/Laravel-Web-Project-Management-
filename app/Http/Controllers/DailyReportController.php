@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DailyReport;
 use App\Models\Project;
+use App\Models\User;
+
 use Illuminate\Support\Facades\Storage;
 
 class DailyReportController extends Controller
@@ -54,7 +56,7 @@ class DailyReportController extends Controller
             ->paginate(15);
 
         $projects = Project::where('owner_id', $user->id)->orderBy('title')->get();
-        $users = \App\Models\User::where('role', 'member')->orderBy('name')->get();
+        $users =User::where('role', 'member')->orderBy('name')->get();
 
         return view('daily_reports.daily_reports', compact('reports', 'projects', 'users'));
     }

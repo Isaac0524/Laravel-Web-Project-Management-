@@ -39,6 +39,11 @@ class AuthController extends Controller
             // Optionally dispatch the Login event if you want to keep the listener
             event(new Login('web', $user, true));
 
+            // Redirect admin users to users.index, others to dashboard
+            if ($user->role === 'admin') {
+                return redirect()->intended(route('users.index'));
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 

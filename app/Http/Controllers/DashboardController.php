@@ -99,6 +99,30 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'completed')
                 ->orderBy('due_date')
                 ->get();
+
+            // Alertes système
+            $alerts = [
+                // Alertes vertes: projets qui commencent aujourd'hui
+                'starting_today' => Project::where('status', 'pending')
+                    ->whereDate('start_date', now()->toDateString())
+                    ->with('owner')
+                    ->get(),
+
+                // Alertes rouges: projets en retard (1 semaine avant échéance)
+                'due_soon' => Project::whereNotNull('due_date')
+                    ->where('due_date', '>=', now())
+                    ->where('due_date', '<=', now()->addDays(7))
+                    ->where('status', '!=', 'completed')
+                    ->with('owner')
+                    ->get(),
+
+                // Projets déjà en retard (échéance passée)
+                'overdue' => Project::whereNotNull('due_date')
+                    ->where('due_date', '<', now())
+                    ->where('status', '!=', 'completed')
+                    ->with('owner')
+                    ->get()
+            ];
         } else {
             // Statistiques pour les membres
             $userProjectIds = $projects->pluck('id');
@@ -134,7 +158,8 @@ class DashboardController extends Controller
             'stats',
             'projectsKanban',
             'recentActivities',
-            'upcomingDeadlines'
+            'upcomingDeadlines',
+            'alerts'
         ));
     }
 }

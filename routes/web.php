@@ -66,14 +66,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/teams/{team}/attach', [TeamController::class,'attachUser'])->name('teams.attach')->middleware('manager.only');
     Route::post('/teams/{team}/detach', [TeamController::class,'detachUser'])->name('teams.detach')->middleware('manager.only');
 
-    // Gestion des utilisateurs (manager)
-    Route::middleware('manager.only')->group(function () {
+    // Gestion des utilisateurs (admin seulement)
+    Route::middleware('admin.only')->group(function () {
         Route::get('/users', [UsersController::class,'index'])->name('users.index');
         Route::post('/users', [UsersController::class,'store'])->name('users.store');
         Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
         Route::put('/users/{user}/reset-password', [UsersController::class,'resetPassword'])->name('users.reset_password');
         Route::put('/users/{user}/role', [UsersController::class,'changeRole'])->name('users.change_role');
         Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
+
+        // Gestion des gestionnaires de projet
+        Route::get('/users/project-managers', [UsersController::class, 'projectManagers'])->name('users.project_managers');
+        Route::put('/projects/{project}/change-manager', [UsersController::class, 'changeProjectManager'])->name('projects.change_manager');
     });
 
     // IA - Endpoints AI

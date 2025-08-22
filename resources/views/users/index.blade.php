@@ -21,12 +21,16 @@
                 <p class="text-2xl font-bold text-gray-900">{{ $stats['total_users'] }}</p>
             </div>
             <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold text-gray-700">Utilisateurs Actifs</h3>
-                <p class="text-2xl font-bold text-gray-900">{{ $stats['active_users'] }}</p>
+                <h3 class="text-lg font-semibold text-gray-700">Membre</h3>
+                <p class="text-2xl font-bold text-gray-900">{{ $stats['members'] }}</p>
             </div>
             <div class="bg-white p-6 rounded-lg shadow">
                 <h3 class="text-lg font-semibold text-gray-700">Managers</h3>
                 <p class="text-2xl font-bold text-gray-900">{{ $stats['managers'] }}</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold text-gray-700">Administrateur</h3>
+                <p class="text-2xl font-bold text-gray-900">{{ $stats['admin'] }}</p>
             </div>
             <div class="bg-white p-6 rounded-lg shadow">
                 <h3 class="text-lg font-semibold text-gray-700">Dernière Connexion</h3>
@@ -46,51 +50,33 @@
             </div>
         </div>
 
-        <!-- Create User Form -->
+        <!-- Search and Create Button Section -->
         <div class="bg-white p-6 rounded-lg shadow mb-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Créer un utilisateur</h2>
-            <form method="POST" action="{{ route('users.store') }}" data-form-confirmation>
-                @csrf
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Nom</label>
-                        <input type="text" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                            required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                            required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Rôle</label>
-                        <select name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="member">Membre</option>
-                            <option value="manager">Manager</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Statut</label>
-                        <select name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="active">Actif</option>
-                            <option value="suspended">Suspendu</option>
-                        </select>
-                    </div>
-                    <div class="relative">
-                        <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                        <input type="password" name="password" id="create-password"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                            placeholder="Laisser vide pour générer">
-                        <button type="button" onclick="togglePassword('create-password')"
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-6">
-                            <i class="fas fa-eye"></i>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <!-- Search Form -->
+                <div class="flex-1">
+                    <form id="searchForm" class="flex gap-2">
+                        <input type="text" name="search" id="searchInput"
+                               placeholder="Rechercher un utilisateur par nom ou email..."
+                               class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            <i class="fas fa-search"></i> Rechercher
                         </button>
-                    </div>
+                        <button type="button" onclick="clearSearch()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                            <i class="fas fa-times"></i> Effacer
+                        </button>
+                    </form>
                 </div>
-                <button type="submit" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Créer
-                    l'utilisateur</button>
-            </form>
+
+                <!-- Create User Button -->
+                <div>
+                    <button onclick="openCreateModal()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        <i class="fas fa-plus"></i> Créer un utilisateur
+                    </button>
+                </div>
+            </div>
         </div>
+
 
         <!-- Users Table -->
         <div class="bg-white p-6 rounded-lg shadow">
@@ -121,9 +107,9 @@
                                     Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-200" id="usersTableBody">
                             @foreach ($users as $u)
-                                <tr>
+                                <tr class="user-row" data-name="{{ strtolower($u->name) }}" data-email="{{ strtolower($u->email) }}">
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $u->name }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $u->email }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ ucfirst($u->role) }}</td>
@@ -168,8 +154,59 @@
             @endif
         </div>
 
+        <!-- Create User Modal -->
+        <div id="createModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Créer un utilisateur</h2>
+                <form method="POST" action="{{ route('users.store') }}" data-form-confirmation>
+                    @csrf
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Nom</label>
+                        <input type="text" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Rôle</label>
+                        <select name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="member">Membre</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Administrateur</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Statut</label>
+                        <select name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="active">Actif</option>
+                            <option value="suspended">Suspendu</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 relative">
+                        <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                        <input type="password" name="password" id="create-password"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                            placeholder="Laisser vide pour générer">
+                        <button type="button" onclick="togglePassword('create-password')"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-6">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="closeCreateModal()"
+                            class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Annuler</button>
+                        <button type="submit"
+                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Créer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Edit User Modal -->
-        <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
+        <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
             <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Modifier l'utilisateur</h2>
                 <form id="editForm" method="POST" data-form-confirmation>
@@ -191,6 +228,8 @@
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                             <option value="member">Membre</option>
                             <option value="manager">Manager</option>
+                            <option value="admin">Administrateur</option>
+
                         </select>
                     </div>
                     <div class="mb-4">
@@ -240,7 +279,16 @@
             }
         }
 
-        // Modal handling
+        // Create Modal handling
+        function openCreateModal() {
+            document.getElementById('createModal').classList.remove('hidden');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.add('hidden');
+        }
+
+        // Edit Modal handling
         function openEditModal(id, name, email, role, status) {
             document.getElementById('edit-id').value = id;
             document.getElementById('edit-name').value = name;
@@ -255,14 +303,70 @@
             document.getElementById('editModal').classList.add('hidden');
         }
 
+        // Search functionality
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
+
+            rows.forEach(row => {
+                const name = row.getAttribute('data-name');
+                const email = row.getAttribute('data-email');
+
+                if (name.includes(searchTerm) || email.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            const rows = document.querySelectorAll('.user-row');
+            rows.forEach(row => row.style.display = '');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search form submission
+            document.getElementById('searchForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchUsers();
+            });
+
+            // Real-time search
+            document.getElementById('searchInput').addEventListener('input', searchUsers);
+
+            // Close modals when clicking outside
+            document.addEventListener('click', function(event) {
+                const createModal = document.getElementById('createModal');
+                const editModal = document.getElementById('editModal');
+
+                if (event.target === createModal) {
+                    closeCreateModal();
+                }
+                if (event.target === editModal) {
+                    closeEditModal();
+                }
+            });
+
+            // Close modals on escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeCreateModal();
+                    closeEditModal();
+                }
+            });
+        });
+
         // Charts
         const roleChart = new Chart(document.getElementById('roleChart'), {
             type: 'pie',
             data: {
-                labels: ['Membres', 'Managers'],
+                labels: ['Admin', 'Membres', 'Managers'],
                 datasets: [{
-                    data: [{{ $stats['total_users'] - $stats['managers'] }}, {{ $stats['managers'] }}],
-                    backgroundColor: ['#3B82F6', '#10B981']
+                    data: [{{ $stats['admin'] }}, {{ $stats['members'] }}, {{ $stats['managers'] }}],
+                    backgroundColor: ['#DC2626', '#3B82F6', '#10B981']
                 }]
             },
             options: {

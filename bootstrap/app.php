@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\ManagerOnly;
+use App\Http\Middleware\AdminOnly;
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -12,7 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-        'manager.only'=> ManagerOnly::class
+        'manager.only'=> ManagerOnly::class,
+        'admin.only'=> AdminOnly::class
+
     ]);
   })
     ->withExceptions(function (Exceptions $exceptions): void {
