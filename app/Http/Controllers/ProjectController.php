@@ -34,7 +34,7 @@ class ProjectController extends Controller
     {
         if (!$request->user()->isManager()) abort(403);
         $data = $request->validate([
-            'title'=>'required|string|max:255',
+            'title'=>'required|string|max:255|unique:projects,title',
             'description'=>'nullable|string',
             'start_date'=>'required|date|after_or_equal:today',
             'due_date'=>'required|date|after:start_date'

@@ -52,8 +52,7 @@
                     <div class="alert-card-header">
                         <div class="alert-card-title">
                             <i class="fas fa-clock" style="color: #f59e0b;"></i>
-                            Échéance proche (7 jours)
-                            <span class="alert-card-count">{{ count($alerts['due_soon']) }}</span>
+                            Échéance proche <span class="alert-card-count">{{ count($alerts['due_soon']) }}</span>
                         </div>
                     </div>
                     <ul class="alert-card-list">
@@ -68,6 +67,7 @@
                     </ul>
                 </div>
                 @endif
+
 
                 <!-- Alertes de retard -->
                 @if(count($alerts['overdue']) > 0)
@@ -92,9 +92,12 @@
                 </div>
                 @endif
             </div>
+
         </div>
         @endif
+
     </div>
+    <br>
     @endif
     <!-- Statistiques -->
     <div class="stats-grid">

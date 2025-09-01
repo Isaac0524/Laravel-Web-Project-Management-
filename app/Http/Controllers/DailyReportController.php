@@ -42,13 +42,13 @@ class DailyReportController extends Controller
 
 
         // Filter by project
-        if ($request->filled('project_id')) {
-            $query->where('project_id', $request->project_id);
+        if ($request->filled('project')) {
+            $query->byProject($request->project);
         }
 
         // Filter by user
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
+        if ($request->filled('user')) {
+            $query->byUser($request->user);
         }
 
         $reports = $query->orderBy('report_date', 'desc')
